@@ -1,9 +1,15 @@
-# Chrome extensions for SockpuppetBrowser
+# Changedetection.io instance with SockpuppetBrowser bundled with Chrome extensions (Docker Compose)
 
 Run [changedetection.io](https://github.com/dgtlmoon/changedetection.io) with a
 [SockpuppetBrowser](https://github.com/dgtlmoon/sockpuppetbrowser) image that has your own Chrome
-extensions loaded — ad/consent blockers, fingerprint tools, captcha solvers, or anything else you
-need a watch to see the page through.
+extensions loaded, such as ad/consent blockers, fingerprint tools, captcha solvers, or anything else you need a watch to see the page through.
+
+**This repo exists for one extension: [NopeCHA](https://chromewebstore.google.com/detail/nopecha-captcha-solver/dknlfmjaanfblgfdfebhijalfmhmjjjo).**
+Watches that hit a captcha or an anti-bot interstitial return the challenge page instead of the
+content you are watching, and there is no way to load a solver into SockpuppetBrowser out of the
+box. NopeCHA is first in `extensions.txt`; the fingerprint and consent extensions alongside it are
+there to keep the browser from being flagged in the first place, so the solver is needed less
+often.
 
 Extensions are listed one URL per line in `extensions.txt`, downloaded and unpacked at image build
 time, and loaded into every browser context changedetection.io opens, including incognito ones.
@@ -16,8 +22,8 @@ time, and loaded into every browser context changedetection.io opens, including 
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/sockpuppet-extension-config.git
-cd sockpuppet-extension-config
+https://github.com/elhossary/changedetection-with-browser-extensions-docker-compose.git
+cd changedetection-with-browser-extensions-docker-compose
 sudo docker compose build --pull browser-sockpuppet-chrome
 sudo docker compose up -d
 ```
@@ -45,7 +51,7 @@ Keep the same Compose directory and project name so Docker keeps using your exis
 and lines starting with `#` are ignored.
 
 ```text
-https://chromewebstore.google.com/detail/consent-o-matic/mdjildafknihdffpkfmmpnpoiajfjnjd
+https://chromewebstore.google.com/detail/nopecha-captcha-solver/dknlfmjaanfblgfdfebhijalfmhmjjjo
 # https://example.com/my-extension.zip
 ```
 
@@ -99,7 +105,8 @@ cryptographically verified. Install extensions you trust.
 
 - Browser profiles are temporary. Extension logins, API keys, and settings entered through an
   extension's UI do not persist between checks — extensions requiring an account or in-UI
-  configuration are largely unusable here.
+  configuration are largely unusable here. This applies to NopeCHA too: only what it does without
+  configuration is available, since a key entered on its options page is gone by the next check.
 - An extension may still misbehave in an isolated/incognito context even with permission granted.
 - An extension may be unavailable from Google's download service even when its listing page
   exists.
@@ -108,6 +115,53 @@ cryptographically verified. Install extensions you trust.
 
 Verify your selected extensions against a test watch after deploying.
 
+## Disclaimer
+
+This project is provided for lawful use only, and is used entirely at your own risk.
+
+**No affiliation.** This repository is an independent, unofficial integration. It is not
+affiliated with, endorsed by, or supported by changedetection.io, SockpuppetBrowser, NopeCHA,
+Google, or the authors of any extension listed in `extensions.txt`. All trademarks and product
+names are the property of their respective owners. Each extension is distributed by its own
+publisher under its own terms and privacy policy; this repository merely downloads and unpacks
+what you point it at, and does not redistribute, modify, or vouch for any extension's code.
+
+**Your responsibility to comply.** You alone are responsible for how you use this software and for
+determining whether that use is lawful in your jurisdiction. Automated access, captcha or
+anti-bot circumvention, and scraping may be restricted by a site's terms of service, by
+robots.txt, by applicable computer-misuse, contract, copyright, or data-protection law, or by all
+of these. Obtain any authorisation you need before pointing a watch at a site you do not control,
+and respect the operator's stated access policies.
+
+**Security.** Extensions run with broad access to every page the browser loads. Downloads are made
+over HTTPS and package identifiers are checked, but CRX signatures are not cryptographically
+verified and no review of extension code is performed. Install only extensions you have
+independently assessed and trust.
+
+**No warranty and no liability.** As stated in Sections 7 and 8 of the [LICENSE](LICENSE), the
+software is provided on an "as is" basis, without warranties or conditions of any kind, express or
+implied, and no contributor is liable for any damages arising from its use. Nothing in this
+repository constitutes legal advice.
+
+## Third-party components
+
+This repository contains no third-party code. It ships one Python script (standard library only),
+a Dockerfile, a Compose file, and a list of URLs. Everything else is fetched on your machine at
+build time and carries its own licence and terms:
+
+| Component | Pulled from |
+| --- | --- |
+| changedetection.io | `ghcr.io/dgtlmoon/changedetection.io:latest` |
+| SockpuppetBrowser | `dgtlmoon/sockpuppetbrowser:latest` (base image) |
+| Chromium and `ca-certificates` | Debian package repositories |
+| Each extension in `extensions.txt` | its publisher, via the Chrome Web Store or the URL you supply |
+
+Note that a container image you build from this repository *does* contain those components. If
+you publish such an image, their licences and terms travel with it, and this repository's licence
+does not cover them.
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Apache License 2.0 — see [LICENSE](LICENSE).
+
+Copyright 2026 Muhammad Elhossary.
