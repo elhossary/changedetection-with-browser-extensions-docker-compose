@@ -1,0 +1,37 @@
+services:
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    container_name: changedetection
+    hostname: changedetection
+    volumes:
+      - changedetection-data:/datastore
+    environment:
+      - PLAYWRIGHT_DRIVER_URL=ws://browser-sockpuppet-chrome:3000/?headful=true
+      - TZ=Europe/Berlin
+      - FETCH_WORKERS=8
+    ports:
+      - 127.0.0.1:5000:5000
+    restart: unless-stopped
+    depends_on:
+      browser-sockpuppet-chrome:
+        condition: service_started
+
+  browser-sockpuppet-chrome:
+    hostname: browser-sockpuppet-chrome
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - 127.0.0.1:3000:3000
+    environment:
+      - SCREEN_WIDTH=1280
+      - SCREEN_HEIGHT=720
+      - SCREEN_DEPTH=24
+      - MAX_CONCURRENT_CHROME_PROCESSES=8
+    shm_size: "8gb"
+    restart: unless-stopped
+
+volumes:
+  changedetection-data:

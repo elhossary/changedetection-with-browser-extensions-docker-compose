@@ -1,0 +1,20 @@
+FROM dgtlmoon/sockpuppetbrowser:latest
+
+USER root
+
+# Use Chromium: branded Chrome restricts --load-extension in current versions.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends chromium ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY browser-extension.py /usr/local/bin/browser-extension.py
+RUN chmod 755 /usr/local/bin/browser-extension.py
+
+COPY extensions.txt /usr/local/share/browser-extensions/extensions.txt
+RUN /usr/bin/python3 /usr/local/bin/browser-extension.py --install
+
+# Sockpuppet uses this launcher for each new, independent browser process.
+ENV CHROME_BIN=/usr/local/bin/browser-extension.py \
+    CHROME_PATH=/usr/lib/chromium/
+
+USER chrome
